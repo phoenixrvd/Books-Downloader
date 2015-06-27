@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Books-Downloader",
+    "description": "The title of the application, displayed in the web store."
+  },
+  "appDesc": {
+    "message": "Служит для загрузки книг целиком с сайта audioknigi.club",
+    "description":"The description of the application, displayed in the web store."
+  },
+  "buttonTitle": {
+    "message": "Скачать",
+    "description":"Default button text."
+  }
+}
