@@ -20,7 +20,7 @@ function getPlaylist(){
     return playList;
 }
 
-function wrapContent(){
+function parse(){
 
     var playlist = getPlaylist();
     if(playlist.length == 0){
@@ -34,11 +34,3 @@ function wrapContent(){
         playlist: playlist
     };
 }
-
-var content = wrapContent();
-chrome.runtime.sendMessage(content, function(response) {
-    if(response != "OK"){
-        console.error(response);
-        console.log(content);
-    }
-});
