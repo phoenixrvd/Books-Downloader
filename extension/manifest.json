@@ -32,7 +32,6 @@
   "permissions": [
     "tabs",
     "downloads",
-    "notifications",
     "<all_urls>"
   ]
 }
