@@ -1,5 +1,5 @@
 function getPlaylist(){
-    var playList = [];
+    var playList = {};
     var $scripts = $('script');
     var mp3Urls = [];
     $scripts.each(function(){
@@ -11,11 +11,10 @@ function getPlaylist(){
 
     $.each(mp3Urls, function(){
         var url = this + "";
-        var file = {
+        playList[url] = {
             url: url,
-            titel: url.match(/\/online\/(.*)/g)[0].replace('/online/', '')
+            titel: url.match(/,\/(.*)/g)[0].replace(',/', '')
         };
-        playList.push(file);
     });
     return playList;
 }
