@@ -1,10 +1,14 @@
 var parsedContent = false;
 var tabId = 0;
 
+function replacePathChars(path){
+    return path.replace(/[`~!@#$%^&*()_|+\-=?;:'",<>\{\}\[\]\\\/\ ]/g, "_");
+}
+
 function download(path, filename, url){
     chrome.downloads.download({
         url: url,
-        filename: path + "/" + filename
+        filename: replacePathChars(path) + "/" + replacePathChars(filename)
     });
 }
 
