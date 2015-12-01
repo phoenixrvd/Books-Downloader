@@ -2,7 +2,7 @@ var parsedContent = false;
 var tabId = 0;
 
 function replacePathChars(path){
-    return path.replace(/[`~!@#$%^&*()_|+\-=?;:'",<>\{\}\[\]\\\/\ ]/g, "_");
+    return path.replace(/[`~!@#$%^&*()_|+=?;:'",<>\{\}\[\]\\\/]/g, "_");
 }
 
 function download(path, filename, url){
