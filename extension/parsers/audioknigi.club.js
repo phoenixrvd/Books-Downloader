@@ -1,7 +1,12 @@
 function parse(){
 
     var playList = {};
-    $.ajax('http://audioknigi.club/rest/bid/34088', {
+    var playerInit = /audioPlayer\((\d+),\d+/.exec($('script').text());
+    if(!playerInit || !playerInit[1]){
+        return;
+    }
+
+    $.ajax('http://audioknigi.club/rest/bid/' + playerInit[1], {
         async: false,
         success: function(content){
             playList = content;
