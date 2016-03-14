@@ -5,10 +5,16 @@ function replacePathChars(path){
     return path.replace(/[`~!@#$%^&*()_|+=?;:'",<>\{\}\[\]\\\/]/g, "_");
 }
 
+function getMp3FileExtension(filename){
+    return (/\.mp3/.exec(filename)) ? "" : ".mp3";
+}
+
 function download(path, filename, url){
+    path = replacePathChars(path);
+    filename = replacePathChars(filename) + getMp3FileExtension(filename);
     chrome.downloads.download({
         url: url,
-        filename: replacePathChars(path) + "/" + replacePathChars(filename)
+        filename: path + "/" + filename
     });
 }
 
