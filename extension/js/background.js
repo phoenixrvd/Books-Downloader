@@ -11,11 +11,16 @@ function getMp3FileExtension(filename){
 
 function download(path, filename, url){
     path = replacePathChars(path);
-    filename = replacePathChars(filename) + getMp3FileExtension(filename);
+    filename = replacePathChars(filename);
     chrome.downloads.download({
         url: url,
         filename: path + "/" + filename
     });
+}
+
+function downloadMp3(path, filename, url){
+    filename = filename + getMp3FileExtension(filename);
+    download(path, filename, url);
 }
 
 function downloadContent(props){
@@ -26,7 +31,7 @@ function downloadContent(props){
     download(path, "desc.txt", desc);
 
     $.each(props.playlist, function(){
-        download(path, this.titel, this.url);
+        downloadMp3(path, this.titel, this.url);
     });
 }
 
