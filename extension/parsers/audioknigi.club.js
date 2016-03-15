@@ -22,9 +22,22 @@ function parse(){
         };
     });
 
+    function getDescriptionText(){
+        var text = [
+            $('.topic-header h1').text().trim() + "\n",
+            $('.topic-content').text().trim() + "\n"
+        ];
+        var $meta = $('.info_layout td > div > div');
+        $meta.each(function(){
+            var $this = $(this);
+            text.push($this.text().trim().replace(/\s+/, ' '));
+        });
+        return text.join("\n");
+    };
+
     return {
         titel: $('.topic-header h1').text().trim(),
-        desc: $('.topic-content').text().trim(),
+        desc: getDescriptionText(),
         image: $('.topic img:last').attr('src'),
         playlist: mp3
     };
