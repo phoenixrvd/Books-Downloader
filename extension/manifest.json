@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": [
-        "http://audioknigi.club/*"
+        "https://audioknigi.club/*"
       ],
       "js": [
         "js/jquery-1.11.3.js",

@@ -6,7 +6,7 @@ function parse(){
         return;
     }
 
-    $.ajax('http://audioknigi.club/rest/bid/' + playerInit[1], {
+    $.ajax('https://audioknigi.club/rest/bid/' + playerInit[1], {
         async: false,
         success: function(content){
             playList = content;
