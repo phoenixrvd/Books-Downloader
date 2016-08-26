@@ -22,9 +22,10 @@ function parse(){
         };
     });
 
+    var titel = $('.topic-header h1').text().trim();
     function getDescriptionText(){
         var text = [
-            $('.topic-header h1').text().trim() + "\n",
+            titel + "\n",
             $('.topic-content').text().trim() + "\n"
         ];
         var $meta = $('.info_layout td > div > div');
@@ -36,7 +37,7 @@ function parse(){
     };
 
     return {
-        titel: $('.topic-header h1').text().trim(),
+        titel: titel,
         desc: getDescriptionText(),
         image: $('.topic img:last').attr('src'),
         playlist: mp3
