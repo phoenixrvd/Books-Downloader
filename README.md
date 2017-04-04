@@ -1,4 +1,4 @@
-#Books-Downloader
+# Books-Downloader
 
 Дополнение для Google-Chrome которое позволяет скачивать Аудиокниги с сайта [audioknigi.club](http://audioknigi.club/) целиком. 
 
@@ -13,7 +13,7 @@
 ![extensions.png](readme/extensions.png)
 
 
-##Скриншоты
+## Скриншоты
 **В браузере**
 
 ![chrome.png](readme/chrome.png)
@@ -22,6 +22,6 @@
 
 ![filemanager.png](readme/filemanager.png)
 
-##Источники и лицензии
+## Источники и лицензии
 
 Иконки взяты [сдесь](http://www.iconarchive.com/show/small-n-flat-icons-by-paomedia/book-bookmark-icon.html).
