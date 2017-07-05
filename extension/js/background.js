@@ -1,5 +1,23 @@
 var parsedContent = false;
 var tabId = 0;
+var runned_items = [];
+
+// Jede Halbe Sekunde schauen, ob was noch in der Queue gibt und
+// es keine 3 Downloads laufen.
+// 3 Ist maximale anzehl von gleichzeitigen Downloads (von Server festgelegt).
+setInterval(function () {
+    if (runned_items.length > 0) {
+        var maxDownloadItemsAtSameTime = 3;
+        chrome.downloads.search({state: 'in_progress', paused: false}, function (results) {
+            if (results.length < maxDownloadItemsAtSameTime)
+                chrome.downloads.search({id: runned_items.shift()}, function (paused_items) {
+                    paused_items.forEach(function (item) {
+                        chrome.downloads.resume(item.id);
+                    });
+                });
+        })
+    }
+}, 500);
 
 function replacePathChars(path){
     return path.replace(/[`~!@#$%^&*()_|+=?;:'",<>\{\}\[\]\\\/]/g, "_");
@@ -15,6 +33,12 @@ function download(path, filename, url){
     chrome.downloads.download({
         url: url,
         filename: path + "/" + filename
+    }, function(id){
+        // Schreiben in Download-Queue, wenn man alle sofort startet,
+        // erlaubt der Server nur 3 Gleichzeitig herunterzuladen, den rest wird von Chrome nach ~30 Sekunden
+        // mit 'interrupted' abgebrochen. Daher am Anfang auf Pause stellen.
+        runned_items.push(id);
+        chrome.downloads.pause(id);
     });
 }
 
