@@ -26,15 +26,16 @@ function parse(){
     function getDescriptionText(){
         var text = [
             titel + "\n",
-            $('.topic-content').text().trim() + "\n"
+            $('.topic-content').text().trim() + "\n\n"
         ];
-        var $meta = $('.info_layout td > div > div');
+        var $meta = $('.book-info .panel-item:not(.flab-rating)').clone();
+        $meta.find('.voting-total, .fa').remove();
         $meta.each(function(){
             var $this = $(this);
             text.push($this.text().trim().replace(/\s+/, ' '));
         });
         return text.join("\n");
-    };
+    }
 
     return {
         titel: titel,
