@@ -12,7 +12,10 @@ setInterval(function () {
             if (results.length < maxDownloadItemsAtSameTime){
                 chrome.downloads.download(runned_items.shift());
             }
-        })
+        });
+        chrome.browserAction.setBadgeText({ text: '' + runned_items.length });
+    } else {
+        chrome.browserAction.setBadgeText({ text: '' });
     }
 }, 500);
 
