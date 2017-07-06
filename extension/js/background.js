@@ -9,12 +9,9 @@ setInterval(function () {
     if (runned_items.length > 0) {
         var maxDownloadItemsAtSameTime = 3;
         chrome.downloads.search({state: 'in_progress', paused: false}, function (results) {
-            if (results.length < maxDownloadItemsAtSameTime)
-                chrome.downloads.search({id: runned_items.shift()}, function (paused_items) {
-                    paused_items.forEach(function (item) {
-                        chrome.downloads.resume(item.id);
-                    });
-                });
+            if (results.length < maxDownloadItemsAtSameTime){
+                chrome.downloads.download(runned_items.shift());
+            }
         })
     }
 }, 500);
@@ -30,15 +27,9 @@ function getMp3FileExtension(filename){
 function download(path, filename, url){
     path = replacePathChars(path);
     filename = replacePathChars(filename);
-    chrome.downloads.download({
+    runned_items.push({
         url: url,
         filename: path + "/" + filename
-    }, function(id){
-        // Schreiben in Download-Queue, wenn man alle sofort startet,
-        // erlaubt der Server nur 3 Gleichzeitig herunterzuladen, den rest wird von Chrome nach ~30 Sekunden
-        // mit 'interrupted' abgebrochen. Daher am Anfang auf Pause stellen.
-        runned_items.push(id);
-        chrome.downloads.pause(id);
     });
 }
 
