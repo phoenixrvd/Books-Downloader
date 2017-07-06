@@ -3,7 +3,7 @@ function parse(){
     var playList = {};
     var playerInit = /audioPlayer\((\d+),\d+/.exec($('script').text());
     if(!playerInit || !playerInit[1]){
-        return;
+        return false;
     }
 
     $.ajax('https://audioknigi.club/rest/bid/' + playerInit[1], {
