@@ -1,6 +1,8 @@
 # Books-Downloader
 
-Дополнение для Google-Chrome которое позволяет скачивать Аудиокниги с сайта [audioknigi.club](http://audioknigi.club/) целиком. 
+Дополнение для Google-Chrome которое позволяет скачивать Аудиокниги с сайтов 
+[audioknigi.club](https://audioknigi.club/) и [sweetbook.net](https://sweetbook.net) 
+целиком. 
 
 При Закачке создаётся отдельная папка, в которую будут сохранены все аудиофайлы а также описание и обложка.
 

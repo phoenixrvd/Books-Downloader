@@ -100,4 +100,5 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 chrome.browserAction.onClicked.addListener(function (tab) {
     downloadContent();
+    buttonDisable();
 });

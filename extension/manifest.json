@@ -14,7 +14,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://audioknigi.club/*"
+        "https://audioknigi.club/*",
+        "https://sweetbook.net/*"
       ],
       "js": [
         "js/jquery-1.11.3.js",
