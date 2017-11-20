@@ -40,7 +40,7 @@ function parse(){
     return {
         titel: titel,
         desc: getDescriptionText(),
-        image: $('.topic img:last').attr('src'),
+        image: $('.picture-side img:last').attr('src'),
         playlist: mp3
     };
 }
