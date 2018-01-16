@@ -1,13 +1,13 @@
-/**
- * Die funktion wird von jeweiligen Parser überladen.
- * @see parsers/audioknigi.club.js
- * @returns {*}
- */
-function parse(){
-    return false;
-}
+$(function () {
 
-chrome.extension.onMessage.addListener(function(msg, sender, sendResponse) {
+    if (typeof parse !== 'function') {
+        return;
+    }
+
     var content = parse();
-    sendResponse(content);
+
+    if (content) {
+        chrome.runtime.sendMessage(content);
+    }
+
 });

@@ -13,7 +13,7 @@ function getPlaylist(){
         var url = this + "";
         playList[url] = {
             url: url,
-            titel: url.match(/,\/(.*)/g)[0].replace(',/', '')
+            title: url.match(/,\/(.*)/g)[0].replace(',/', '')
         };
     });
     return playList;
@@ -26,12 +26,12 @@ function parse(){
         return false;
     }
 
-    var titel = $('.topic-header h1').text().trim();
+    var title = $('.topic-header h1').text().trim();
     function getDescriptionText(){
         var $textContent = $('.topic-content.text').clone();
         $textContent.find('.ya-share2').remove();
         var text = [
-            titel + "\n",
+            title + "\n",
             $textContent.text().trim() + "\n\n"
         ];
         var $meta = $('.topic-content-begin div:first div').clone();
@@ -44,7 +44,7 @@ function parse(){
     }
 
     return {
-        titel: titel,
+        title: title,
         desc: getDescriptionText(),
         image: $('.topic img:last').attr('src'),
         playlist: playlist

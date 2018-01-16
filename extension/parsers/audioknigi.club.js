@@ -18,14 +18,14 @@ function parse(){
         var url = value.mp3;
         mp3[url] = {
             url: url,
-            titel: value.title
+            title: value.title
         };
     });
 
-    var titel = $('.topic-header h1').text().trim();
+    var title = $('.topic-header h1').text().trim();
     function getDescriptionText(){
         var text = [
-            titel + "\n",
+            title + "\n",
             $('.topic-content').text().trim() + "\n\n"
         ];
         var $meta = $('.book-info .panel-item:not(.flab-rating)').clone();
@@ -38,7 +38,7 @@ function parse(){
     }
 
     return {
-        titel: titel,
+        title: title,
         desc: getDescriptionText(),
         image: $('.picture-side img:last').attr('src'),
         playlist: mp3

@@ -1,6 +1,13 @@
-var parsedContent = false;
-var tabId = 0;
+var parsedContent = {
+    title: '',
+    desc: '',
+    image: '',
+    playlist: []
+};
+
 var queue = [];
+
+var browserAction = chrome.browserAction;
 
 function startDownloads() {
     var maxDownloadsItemsAtSameTime = 3;
@@ -26,7 +33,7 @@ function pushQueuItem(path, filename, url) {
 }
 
 function downloadContent() {
-    var path = replacePathChars(parsedContent.titel);
+    var path = replacePathChars(parsedContent.title);
 
     // Add cover-Image
     pushQueuItem(path, "cover.jpg", parsedContent.image);
@@ -36,69 +43,48 @@ function downloadContent() {
     pushQueuItem(path, "desc.txt", desc);
 
     // Add all MP3 Tracks
-    $.each(parsedContent.playlist, function () {
-        var filename = this.titel + getMp3FileExtension(this.titel);
-        pushQueuItem(path, filename, this.url);
-    });
+    for (var trackUrl in parsedContent.playlist) {
+        var track = parsedContent.playlist[trackUrl];
+        var filename = track.title + getMp3FileExtension(track.title);
+        pushQueuItem(path, filename, track.url);
+    }
 
     // Whatch and download all queue Items. Clear timers if queue is empty
     var timer = setInterval(function () {
         startDownloads();
-        chrome.browserAction.setBadgeText({text: '' + queue.length});
+        browserAction.setBadgeText({text: '' + queue.length});
 
         if (queue.length === 0) {
             clearInterval(timer);
-            chrome.browserAction.setBadgeText({text: ''});
+            browserAction.setBadgeText({text: ''});
         }
     }, 1000);
 }
 
-function loadParser(url) {
-    var link = $('<a/>');
-    link.attr('href', url);
-    var parser = 'parsers/' + link[0].hostname + ".js.txt";
-    var parserUrl = chrome.extension.getURL(parser);
-    return $.ajax(parserUrl);
+function buttonDisable(tabId) {
+    browserAction.disable(tabId);
+    browserAction.setTitle({title: ''});
+    browserAction.setIcon({path: "img/icon_24_24_gray.png", tabId: tabId});
 }
 
-function buttonEnable(content) {
-    var title = chrome.i18n.getMessage('buttonTitle') + ": " + content.titel;
-    parsedContent = content;
-    chrome.browserAction.enable(tabId);
-    chrome.browserAction.setTitle({title: title});
-    chrome.browserAction.setIcon({path: "img/icon_24_24.png", tabId: tabId});
-}
-
-function buttonDisable() {
-    parsedContent = false;
-    chrome.browserAction.disable(tabId);
-    chrome.browserAction.setIcon({path: "img/icon_24_24_gray.png", tabId: tabId});
-}
-
-function onLoad(tab) {
-    var tabs = chrome.tabs;
-    var tabUrl = tab.url;
-    tabId = tab.id;
-
-    buttonDisable();
-    loadParser(tabUrl).success(function (content) {
-        tabs.executeScript(tabId, {code: content}, function () {
-            tabs.sendMessage(tabId, 'parse', function (response) {
-                if(response){
-                    buttonEnable(response);
-                }
-            });
-        });
-    })
-}
+browserAction.onClicked.addListener(function (tab) {
+    downloadContent();
+    buttonDisable(tab.id);
+});
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    if (changeInfo.status === "complete") {
-        onLoad(tab);
+    if (changeInfo.status === "loading") {
+        buttonDisable(tab.id)
     }
 });
 
-chrome.browserAction.onClicked.addListener(function (tab) {
-    downloadContent();
-    buttonDisable();
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    parsedContent = request;
+
+    var title = chrome.i18n.getMessage('buttonTitle') + ": " + request.title;
+    var tabId = sender.tab.id;
+
+    browserAction.enable(tabId);
+    browserAction.setTitle({title: title});
+    browserAction.setIcon({path: "img/icon_24_24.png", tabId: tabId});
 });
