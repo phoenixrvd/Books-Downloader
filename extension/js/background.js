@@ -56,7 +56,7 @@ function downloadContent() {
 function loadParser(url) {
     var link = $('<a/>');
     link.attr('href', url);
-    var parser = 'parsers/' + link[0].hostname + ".js";
+    var parser = 'parsers/' + link[0].hostname + ".js.txt";
     var parserUrl = chrome.extension.getURL(parser);
     return $.ajax(parserUrl);
 }
