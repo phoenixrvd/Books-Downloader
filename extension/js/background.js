@@ -8,15 +8,35 @@ var parsedContent = {
 var queue = [];
 
 var browserAction = chrome.browserAction;
+var downloads = chrome.downloads;
+var queueWatcherId = 0;
 
-function startDownloads() {
-    var maxDownloadsItemsAtSameTime = 3;
-    chrome.downloads.search({state: 'in_progress', paused: false}, function (results) {
-        var freePalces = maxDownloadsItemsAtSameTime - results.length;
-        while(queue.length > 0 && freePalces-- > 0){
-            chrome.downloads.download(queue.shift());
+function watchQueuedItems() {
+
+    downloads.search({state: 'in_progress', paused: false}, function (results) {
+
+        var maxDownloadsAtSameTime  = 3;
+        var watcherSleepTimeMilSec  = 300;
+
+        clearInterval(queueWatcherId);
+
+        if (maxDownloadsAtSameTime <= results.length) {
+            queueWatcherId = setInterval(watchQueuedItems, watcherSleepTimeMilSec);
+            return;
         }
+
+        if (queue.length === 0) {
+            browserAction.setBadgeText({text: ''});
+            return;
+        }
+
+        downloads.download(queue.shift(), function(){
+            queueWatcherId = setInterval(watchQueuedItems, watcherSleepTimeMilSec);
+            browserAction.setBadgeText({text: '' + queue.length});
+        });
+
     });
+
 }
 
 function replacePathChars(path) {
@@ -27,38 +47,30 @@ function getMp3FileExtension(filename) {
     return (/\.mp3/.exec(filename)) ? "" : ".mp3";
 }
 
-function pushQueuItem(path, filename, url) {
-    var fileRelativePath = path + "/" + replacePathChars(filename);
+function pushQueueItem(filename, url) {
+    var path = replacePathChars(parsedContent.title);
+    var fileRelativePath = path + "/" + filename;
     queue.push({url: url, filename: fileRelativePath, conflictAction: 'overwrite'});
 }
 
 function downloadContent() {
-    var path = replacePathChars(parsedContent.title);
 
     // Add cover-Image
-    pushQueuItem(path, "cover.jpg", parsedContent.image);
+    pushQueueItem("cover.jpg", parsedContent.image);
 
     // Add book description
     var desc = 'data:text/plain;charset=utf-8,' + encodeURIComponent(parsedContent.desc);
-    pushQueuItem(path, "desc.txt", desc);
+    pushQueueItem("desc.txt", desc);
 
     // Add all MP3 Tracks
     for (var trackUrl in parsedContent.playlist) {
         var track = parsedContent.playlist[trackUrl];
-        var filename = track.title + getMp3FileExtension(track.title);
-        pushQueuItem(path, filename, track.url);
+        var filename = replacePathChars(track.title) + getMp3FileExtension(track.title);
+        pushQueueItem(filename, track.url);
     }
 
-    // Whatch and download all queue Items. Clear timers if queue is empty
-    var timer = setInterval(function () {
-        startDownloads();
-        browserAction.setBadgeText({text: '' + queue.length});
-
-        if (queue.length === 0) {
-            clearInterval(timer);
-            browserAction.setBadgeText({text: ''});
-        }
-    }, 1000);
+    // Watch and download all queue Items.
+    watchQueuedItems();
 }
 
 function buttonDisable(tabId) {
@@ -78,7 +90,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     }
 });
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender) {
     parsedContent = request;
 
     var title = chrome.i18n.getMessage('buttonTitle') + ": " + request.title;
