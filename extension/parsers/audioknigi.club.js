@@ -41,6 +41,6 @@ function parse(){
         title: title,
         desc: getDescriptionText(),
         image: $('.picture-side img:last').attr('src'),
-        playlist: mp3
+        files: mp3
     };
 }

@@ -47,6 +47,6 @@ function parse(){
         title: title,
         desc: getDescriptionText(),
         image: $('.topic img:last').attr('src'),
-        playlist: playlist
+        files: playlist
     };
 }

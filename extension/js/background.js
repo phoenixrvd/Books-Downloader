@@ -2,7 +2,7 @@ var parsedContent = {
     title: '',
     desc: '',
     image: '',
-    playlist: []
+    files: []
 };
 
 var queue = [];
@@ -63,8 +63,8 @@ function downloadContent() {
     pushQueueItem("desc.txt", desc);
 
     // Add all MP3 Tracks
-    for (var trackUrl in parsedContent.playlist) {
-        var track = parsedContent.playlist[trackUrl];
+    for (var trackUrl in parsedContent.files) {
+        var track = parsedContent.files[trackUrl];
         var filename = replacePathChars(track.title) + getMp3FileExtension(track.title);
         pushQueueItem(filename, track.url);
     }
