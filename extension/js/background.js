@@ -20,13 +20,13 @@ function watchQueuedItems() {
 
         clearInterval(queueWatcherId);
 
-        if (maxDownloadsAtSameTime <= results.length) {
-            queueWatcherId = setInterval(watchQueuedItems, watcherSleepTimeMilSec);
-            return;
-        }
-
         if (queue.length === 0) {
             browserAction.setBadgeText({text: ''});
+            return;
+        }
+        
+        if (maxDownloadsAtSameTime <= results.length) {
+            queueWatcherId = setInterval(watchQueuedItems, watcherSleepTimeMilSec);
             return;
         }
 
