@@ -1,15 +1,20 @@
 function parse(){
 
     var playList = {};
-    var playerInit = /audioPlayer\((\d+),\d+/.exec($('script').text());
-    if(!playerInit || !playerInit[1]){
-        return false;
+    const bidHolder = document.querySelector('.js-topic-player')
+    if (!bidHolder) {
+      return false
     }
 
-    $.ajax('//audioknigi.club/rest/bid/' + playerInit[1], {
+    const bid = (bidHolder.dataset || {}).globalId;
+    if (!bid) {
+      return false
+    }
+
+    $.ajax('//audioknigi.club/rest/bid/' + bid, {
         async: false,
         success: function(content){
-            playList = content;
+            playList = JSON.parse(content);
         }
     });
 
@@ -22,11 +27,11 @@ function parse(){
         };
     });
 
-    var title = $('.topic-header h1').text().trim();
+    var title = $('.ls-topic-title').text().trim();
     function getDescriptionText(){
         var text = [
             title + "\n",
-            $('.topic-content').text().trim() + "\n\n"
+            $('.ls-topic-content').text().trim() + "\n\n"
         ];
         var $meta = $('.book-info .panel-item:not(.flab-rating)').clone();
         $meta.find('.voting-total, .fa').remove();
