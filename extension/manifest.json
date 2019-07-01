@@ -1,9 +1,11 @@
 {
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "manifest_version": 2,
     "default_locale": "ru",
+    "author": "PhoenixRVD",
+    "homepage_url": "https://github.com/phoenixrvd/Books-Downloader",
     "icons": {
         "128": "img/icon_128_128.png"
     },
@@ -13,21 +15,21 @@
     },
     "content_scripts": [
         {
-            "matches": [
-                "*://*/*"
-            ],
-            "js": [
-                "js/jquery-1.11.3.js",
-                "js/parser_adapter.js"
-            ]
-        },
-        {
             "matches": [ "https://audioknigi.club/*" ],
             "js": [ "parsers/audioknigi.club.js" ]
         },
         {
             "matches": [ "https://sweetbook.net/*" ],
             "js": [ "parsers/sweetbook.net.js" ]
+        },
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "js/jquery-3.4.1.min.js",
+                "js/parser_adapter.js"
+            ]
         }
     ],
     "background": {
@@ -38,5 +40,10 @@
         "tabs",
         "downloads",
         "<all_urls>"
-    ]
+    ],
+    "browser_specific_settings": {
+        "gecko": {
+            "strict_min_version": "65.0"
+        }
+    }
 }

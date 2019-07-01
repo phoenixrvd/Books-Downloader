@@ -1,12 +1,12 @@
 function parse(){
 
     var playList = {};
-    const bidHolder = document.querySelector('.js-topic-player')
+    var bidHolder = document.querySelector('.js-topic-player');
     if (!bidHolder) {
       return false
     }
 
-    const bid = (bidHolder.dataset || {}).globalId;
+    var bid = (bidHolder.dataset || {}).globalId;
     if (!bid) {
       return false
     }

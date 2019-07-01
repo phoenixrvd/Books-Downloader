@@ -59,7 +59,11 @@ function downloadContent() {
     pushQueueItem("cover.jpg", parsedContent.image);
 
     // Add book description
-    var desc = 'data:text/plain;charset=utf-8,' + encodeURIComponent(parsedContent.desc);
+    var blob = new Blob([parsedContent.desc], {
+        encoding:'UTF-8',
+        type:'text/plain;charset=UTF-8'
+    });
+    var desc = URL.createObjectURL(blob);
     pushQueueItem("desc.txt", desc);
 
     // Add all MP3 Tracks
