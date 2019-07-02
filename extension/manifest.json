@@ -1,7 +1,7 @@
 {
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "1.0.6",
+    "version": "1.1.0",
     "manifest_version": 2,
     "default_locale": "ru",
     "author": "PhoenixRVD",
@@ -16,19 +16,10 @@
     "content_scripts": [
         {
             "matches": [ "https://audioknigi.club/*" ],
-            "js": [ "parsers/audioknigi.club.js" ]
-        },
-        {
-            "matches": [ "https://sweetbook.net/*" ],
-            "js": [ "parsers/sweetbook.net.js" ]
-        },
-        {
-            "matches": [
-                "*://*/*"
-            ],
             "js": [
-                "js/jquery-3.4.1.min.js",
-                "js/parser_adapter.js"
+                "js/content/jquery-3.4.1.min.js",
+                "js/content/parser.js",
+                "js/content/loader.js"
             ]
         }
     ],
@@ -37,9 +28,8 @@
         "persistent": false
     },
     "permissions": [
-        "tabs",
         "downloads",
-        "<all_urls>"
+        "https://audioknigi.club/*"
     ],
     "browser_specific_settings": {
         "gecko": {
