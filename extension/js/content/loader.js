@@ -1,9 +1,7 @@
 $(function () {
 
-    var content = parse();
-
-    if (content) {
+    loadBookData(function (content) {
         chrome.runtime.sendMessage(content);
-    }
+    })
 
 });
