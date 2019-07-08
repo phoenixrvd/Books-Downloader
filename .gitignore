@@ -1,4 +1,7 @@
 .idea
 .vscode
 audioknigi_donloader.zip
+package-lock.json
+node_modules
+test/cache/
 *~

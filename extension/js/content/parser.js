@@ -21,12 +21,17 @@ function getBookId() {
 
 function preparePageData(playList) {
 
-    var title = $('.ls-topic-title').text().trim();
+    var document_title =  $('.ls-topic-title').text().trim();
+    var title_parts = document_title.split(' - ');
 
     var data = {
-        title: title,
-        desc: title + "\n\n" + getDescriptionText(),
-        image: $('.picture-side img:last,.topic-image').attr('src'),
+        id: getBookId(),
+        author: title_parts.shift(),
+        title: title_parts.join(' - '),
+        description: getDescriptionText(),
+        metadata: getMetaData(),
+        image: $('.picture-side img:last, .topic-image').attr('src'),
+        source: $('[property="og:url"]').attr('content'),
         files: {}
     };
 
@@ -41,46 +46,45 @@ function preparePageData(playList) {
     return data;
 }
 
-function getDescriptionText() {
-
-    if($('.layout--template-acl10-mobile').length > 0) {
-         return getDescriptionTextMobile();
-    }
-
-    return getDescriptionTextDesktop();
-}
-
 function getDescriptionTextMobile() {
 
     var description = $('.topic-content').clone();
-    description.find('.topic-content-right').remove();
+    description.find('.topic-content-right,.ya-share2').remove();
+    return description.text().trim();
+}
 
-    var text = [
-        description.text().trim() + "\n\n"
-    ];
+function getMetaDataMobile() {
 
+    var data = [];
     var $meta = $('.book-info');
+
     $meta.find('.fa').remove();
     $meta.find('.item-info').each(function(){
         var $this = $(this);
-        text.push($this.text().trim().replace(/\s+/, ' '));
+        data.push($this.text().trim().replace(/\s+/, ' '));
     });
 
-    return text.join("\n");
+    return data;
 }
 
-function getDescriptionTextDesktop() {
+function getDescriptionText() {
+    return $('.ls-topic-content').text().trim();
+}
 
-    var text = [
-        $('.ls-topic-content').text().trim() + "\n\n"
-    ];
+function getMetaData() {
+    var data = [];
     var $meta = $('.book-info .panel-item:not(.flab-rating)').clone();
 
     $meta.find('.voting-total, .fa').remove();
     $meta.each(function () {
         var $this = $(this);
-        text.push($this.text().trim().replace(/\s+/, ' '));
+        data.push($this.text().trim().replace(/\s+/, ' '));
     });
 
-    return text.join("\n");
+    return data;
+}
+
+if($('.layout--template-acl10-mobile').length > 0) {
+    getDescriptionText = getDescriptionTextMobile;
+    getMetaData = getMetaDataMobile;
 }

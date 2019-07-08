@@ -1,7 +1,11 @@
 var parsedContent = {
+    id: 0,
+    author: '',
     title: '',
-    desc: '',
+    description: '',
+    metadata: [],
     image: '',
+    source: '',
     files: []
 };
 
@@ -48,9 +52,18 @@ function getMp3FileExtension(filename) {
 }
 
 function pushQueueItem(filename, url) {
-    var path = replacePathChars(parsedContent.title);
+    var path = replacePathChars(parsedContent.author + ' - ' + parsedContent.title);
     var fileRelativePath = path + "/" + filename;
     queue.push({url: url, filename: fileRelativePath, conflictAction: 'overwrite'});
+}
+
+function downloadBlobText(filename, text) {
+    var blob = new Blob([text], {
+        encoding:'UTF-8',
+        type:'text/plain;charset=UTF-8'
+    });
+    var content = URL.createObjectURL(blob);
+    pushQueueItem(filename, content);
 }
 
 function downloadContent() {
@@ -59,12 +72,15 @@ function downloadContent() {
     pushQueueItem("cover.jpg", parsedContent.image);
 
     // Add book description
-    var blob = new Blob([parsedContent.desc], {
-        encoding:'UTF-8',
-        type:'text/plain;charset=UTF-8'
-    });
-    var desc = URL.createObjectURL(blob);
-    pushQueueItem("desc.txt", desc);
+    var description = [
+        parsedContent.author + ' - ' + parsedContent.title,
+        '\n',
+        parsedContent.description,
+        '\n',
+        parsedContent.metadata.join('\n')
+    ];
+    downloadBlobText("desc.txt", description.join('\n'));
+    downloadBlobText("desc.json", JSON.stringify(parsedContent, null, 2));
 
     // Add all MP3 Tracks
     for (var trackUrl in parsedContent.files) {

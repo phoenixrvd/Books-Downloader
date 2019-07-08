@@ -1,0 +1,26 @@
+{
+  "name": "audioknigi_donloader",
+  "dependencies": {},
+  "devDependencies": {
+    "fs-extra": "^8.1.0",
+    "jquery": "^3.4.1",
+    "jsdom": "^15.1.1",
+    "mocha": "^6.1.4",
+    "puppeteer": "^1.18.1",
+    "zip-folder": "^1.0.0"
+  },
+  "scripts": {
+    "test:parser": "mocha",
+    "test:stub": "node scripts/stub.js",
+    "dist:sandbox": "node scripts/sandbox.js",
+    "dist:zip": "node scripts/zip.js"
+  },
+  "config": {
+    "scripts": {
+      "test:parser": "test of data parsed data (fetch stub furst)",
+      "test:stub": "fetch of currently page",
+      "dist:sandbox": "start browser with 2 tabs: desktop an mobile",
+      "dist:zip": "pack the extension into zip file (firefox - Extension)"
+    }
+  }
+}
