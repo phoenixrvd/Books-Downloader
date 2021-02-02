@@ -6,7 +6,7 @@ function loadBookData(onSuccess) {
         return;
     }
 
-    $.ajax('//audioknigi.club/rest/bid/' + bookId, {
+    $.ajax('//akniga.org/rest/bid/' + bookId, {
         success: function (content) {
             var pageData = preparePageData(JSON.parse(content));
             onSuccess(pageData);
