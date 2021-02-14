@@ -1,8 +1,7 @@
 # Books-Downloader
 
-Дополнение для Google-Chrome и Firefox (в том числе Firefox Андроид) которое позволяет скачивать Аудиокниги с сайтов 
-[audioknigi.club](https://audioknigi.club/) и [sweetbook.net](https://sweetbook.net) 
-целиком. 
+Дополнение для Google-Chrome и Firefox (в том числе Firefox Андроид) которое позволяет скачивать Аудиокниги с сайта
+[akniga.org](https://akniga.org/) целиком.
 
 При Закачке создаётся отдельная папка, в которую будут сохранены все аудиофайлы а также описание и обложка.
 
