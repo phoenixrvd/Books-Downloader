@@ -47,10 +47,6 @@ function replacePathChars(path) {
     return path.replace(/[~!@#$%^&*()_|+=?;:'",<>\{\}\[\]\\\/`]/g, "_");
 }
 
-function getMp3FileExtension(filename) {
-    return (/\.mp3/.exec(filename)) ? "" : ".mp3";
-}
-
 function pushQueueItem(filename, url) {
     var path = replacePathChars(parsedContent.author + ' - ' + parsedContent.title);
     var fileRelativePath = path + "/" + filename;
@@ -83,14 +79,19 @@ function downloadContent() {
     downloadBlobText("desc.json", JSON.stringify(parsedContent, null, 2));
 
     // Add all MP3 Tracks
-    for (var trackUrl in parsedContent.files) {
-        var track = parsedContent.files[trackUrl];
-        var filename = replacePathChars(track.title) + getMp3FileExtension(track.title);
-        pushQueueItem(filename, track.url);
+    for (const trackUrl of parsedContent.files) {
+        var filename = replacePathChars(trackUrl.basename());
+        pushQueueItem(filename, trackUrl);
     }
 
     // Watch and download all queue Items.
     watchQueuedItems();
+}
+
+// Returns the filename or directory portion of pathname.
+// E.g. `"foo/bar.baz".basename() == "bar.baz"`, `"foobar".basename() == "foobar"`.
+String.prototype.basename = function() {
+    return this.substr(this.lastIndexOf('/') + 1);
 }
 
 function buttonDisable(tabId) {

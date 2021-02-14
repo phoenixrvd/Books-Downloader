@@ -7,7 +7,6 @@ function loadBookData(onSuccess) {
     }
 
     requestBookData(bookId, content => {
-        console.log('content: ', content);
         const pageData = preparePageData(content);
         onSuccess(pageData);
     });
