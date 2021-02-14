@@ -18,6 +18,7 @@
             "matches": [ "https://akniga.org/*" ],
             "js": [
                 "js/content/jquery-3.4.1.min.js",
+                "js/content/crypto-js.min.js",
                 "js/content/parser.js",
                 "js/content/loader.js"
             ]
