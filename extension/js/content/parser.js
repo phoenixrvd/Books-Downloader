@@ -75,24 +75,16 @@ Array.prototype.nub = function() {
 function preparePageData(response) {
     const bookId = getBookId();
 
-    var data = {
+    const data = {
         id: bookId,
         author: response.author,
         title: response.titleonly,
-        description: "", //getDescriptionText(),
-        metadata: [], //getMetaData(),
+        description: getDescriptionText(),
+        metadata: getMetaData(),
         image: getBookCover(),
         source: response.bookurl,
         files: getURLs(bookId, response)
     };
-
-    /*$.each(response, function (key, value) {
-        var url = value.mp3;
-        data.files[url] = {
-            url: url,
-            title: value.title
-        };
-    });*/
 
     return data;
 }
@@ -119,20 +111,25 @@ function getMetaDataMobile() {
 }
 
 function getDescriptionText() {
-    return $('.ls-topic-content').text().trim();
+    return $('article .description__article-main').text().trim();
 }
 
 function getMetaData() {
-    var data = [];
-    var $meta = $('.book-info .panel-item:not(.flab-rating)').clone();
+    // this should select the top metadata fields (Author, Performer, Rating, Duration, optional Year)
+    // except for Alternative performances
+    var $about = $('.caption__article--about-block:not(.caption__article--about-block-samebook)').clone();
+    $about.find('.tooltip__main').remove();
+    const metadata = $about.toArray().map(div =>
+        div.innerText
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join(': ')
+    );
 
-    $meta.find('.voting-total, .fa').remove();
-    $meta.each(function () {
-        var $this = $(this);
-        data.push($this.text().trim().replace(/\s+/, ' '));
-    });
+    const classifiers = [$('article .classifiers__article-main').text().trim().replaceAll(/ +/g, ' ')];
 
-    return data;
+    return metadata.concat(classifiers);
 }
 
 if($('.layout--template-acl10-mobile').length > 0) {
