@@ -8,19 +8,13 @@ function loadBookData(onSuccess) {
 
     requestBookData(bookId, content => {
         console.log('content: ', content);
+        const pageData = preparePageData(content);
+        onSuccess(pageData);
     });
-
-    /*
-    $.ajax('//akniga.org/rest/bid/' + bookId, {
-        success: function (content) {
-            var pageData = preparePageData(JSON.parse(content));
-            onSuccess(pageData);
-        }
-    });
-    */
 }
 
 // Makes an AJAX request to get information about the book with `bookId`.
+// `onSuccess` is called if the request has succeeded, its parameter is parsed JSON response.
 function requestBookData(bookId, onSuccess) {
     // note: `LIVESTREET_SECURITY_KEY` is set in the HTML page and it's correlated with the user's cookie
     // the request below works because the browser sends the user's cookie along with our data
@@ -30,36 +24,75 @@ function requestBookData(bookId, onSuccess) {
 
     $.post('https://akniga.org/ajax/b/' + bookId,
         { bid: bookId, hash: encryptedHash, security_ls_key: securityKey },
-        onSuccess)
+        response => {
+            // the response is already parsed into a JSON object, however its
+            // `items` property is still a string containing more JSON data, so
+            // we parse it here
+            var parsedResponse = response;
+            parsedResponse.items = JSON.parse(response.items);
+            onSuccess(parsedResponse);
+        })
 }
 
 function getBookId() {
     return $('article').attr('data-bid');
 }
 
-function preparePageData(playList) {
+function getBookCover() {
+    return $('article .book--cover img').attr('src')
+}
 
-    var document_title =  $('.ls-topic-title').text().trim();
-    var title_parts = document_title.split(' - ');
+function getURLs(bookId, data) {
+    const baseURL = `${data.srv}b/${bookId}/${data.key}/`;
+    return data.items
+        .map(item => item.file)
+        .nub()
+        .map(file => {
+            // note: filenames have a two-digit one-based index
+            // a long book to see the URLs is: https://akniga.org/tolstoy-lev-voyna-i-mir-1
+            const index = file.toString().padStart(2, '0');
+            return `${baseURL}${index}. ${data.title}.mp3`
+        })
+}
+
+// Removes sequentially-duplicated values leaving only the first from each group.
+// E.g. `[1, 1, 1, 2, 2, 3, 1, 4, 4].nub() == [1, 2, 3, 1, 4]`.
+Array.prototype.nub = function() {
+    return this.reduce(function (acc, item) {
+        if (acc.length == 0) {
+            return [item]
+        } else {
+            const previousItem = acc[acc.length - 1];
+            if (item == previousItem) {
+                return acc
+            } else {
+                return acc.concat(item)
+            }
+        }
+    }, [])
+};
+
+function preparePageData(response) {
+    const bookId = getBookId();
 
     var data = {
-        id: getBookId(),
-        author: title_parts.shift(),
-        title: title_parts.join(' - '),
-        description: getDescriptionText(),
-        metadata: getMetaData(),
-        image: $('.picture-side img:last, .topic-image').attr('src'),
-        source: $('[property="og:url"]').attr('content'),
-        files: {}
+        id: bookId,
+        author: response.author,
+        title: response.titleonly,
+        description: "", //getDescriptionText(),
+        metadata: [], //getMetaData(),
+        image: getBookCover(),
+        source: response.bookurl,
+        files: getURLs(bookId, response)
     };
 
-    $.each(playList, function (key, value) {
+    /*$.each(response, function (key, value) {
         var url = value.mp3;
         data.files[url] = {
             url: url,
             title: value.title
         };
-    });
+    });*/
 
     return data;
 }
