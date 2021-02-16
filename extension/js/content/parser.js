@@ -50,7 +50,7 @@ function getURLs(bookId, data) {
             // note: filenames have a two-digit one-based index
             // a long book to see the URLs is: https://akniga.org/tolstoy-lev-voyna-i-mir-1
             const index = file.toString().padStart(2, '0');
-            return `${baseURL}${index} - ${data.title}.mp3`
+            return `${baseURL}${index}. ${data.title}.mp3`
         })
 }
 
