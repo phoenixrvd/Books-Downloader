@@ -126,7 +126,7 @@ function getMetaData() {
             .join(': ')
     );
 
-    const classifiers = [$('article .classifiers__article-main').text().trim().replaceAll(/ +/g, ' ')];
+    const classifiers = [$('article .classifiers__article-main').text().trim().replace(/ +/g, ' ')];
 
     return metadata.concat(classifiers);
 }
