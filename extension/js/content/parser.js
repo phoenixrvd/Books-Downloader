@@ -119,7 +119,7 @@ function getMetaData() {
     var $about = $('.caption__article--about-block:not(.caption__article--about-block-samebook)').clone();
     $about.find('.tooltip__main').remove();
     const metadata = $about.toArray().map(div =>
-        div.innerText
+        $(div).text()
             .split('\n')
             .map(line => line.trim())
             .filter(line => line.length > 0)
