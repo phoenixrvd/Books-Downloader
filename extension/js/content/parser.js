@@ -110,7 +110,9 @@ function getMetaDataMobile() {
 }
 
 function getDescriptionText() {
-    return $('article .description__article-main').text().trim();
+    const desc = $('article .description__article-main:first()').clone();
+    desc.find('div').remove();
+    return desc.text().trim();
 }
 
 function getMetaData() {
