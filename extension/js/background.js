@@ -107,10 +107,11 @@ browserAction.onClicked.addListener(function (tab) {
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (changeInfo.status === "loading") {
-        buttonDisable(tab.id);
+        buttonDisable(tabId);
     }
 
     if (changeInfo.status === "complete") {
+        buttonDisable(tabId);
         chrome.tabs.sendMessage(tabId, {});
     }
 });
