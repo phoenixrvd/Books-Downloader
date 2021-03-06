@@ -48,7 +48,7 @@ function replacePathChars(path) {
 }
 
 function pushQueueItem(filename, url) {
-    var path = replacePathChars(parsedContent.author + ' - ' + parsedContent.title);
+    var path = (replacePathChars(parsedContent.author + ' - ' + parsedContent.title)).trim();
     var fileRelativePath = path + "/" + filename;
     queue.push({url: url, filename: fileRelativePath, conflictAction: 'overwrite'});
 }
