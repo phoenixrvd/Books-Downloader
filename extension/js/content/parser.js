@@ -76,8 +76,8 @@ function preparePageData(response) {
 
     const data = {
         id: bookId,
-        author: response.author,
-        title: response.titleonly,
+        author: response.author.trim(),
+        title: response.titleonly.trim(),
         description: getDescriptionText(),
         metadata: getMetaData(),
         image: getBookCover(),
