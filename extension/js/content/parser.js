@@ -79,7 +79,7 @@ function preparePageData(response) {
         author: (response.author || "").trim(),
         title: (response.titleonly || "").trim(),
         description: getDescriptionText(),
-        metadata: getMetaData(),
+        metadata: getMetaData().filter(v => v),
         image: getBookCover(),
         source: response.bookurl,
         files: getURLs(bookId, response)
