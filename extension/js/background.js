@@ -48,7 +48,13 @@ function replacePathChars(path) {
 }
 
 function pushQueueItem(filename, url) {
-    var path = replacePathChars(parsedContent.author + ' - ' + parsedContent.title);
+    const rawDirectory = parsedContent.author != ''
+        ? parsedContent.author + ' - ' + parsedContent.title
+        // firefox 108.0.1 doesn't want to download any file when the directory starts
+        // with ` - ` in case `author` is empty, so we're using only the `title` in
+        // such cases; for example, https://akniga.org/zolotoy-fond-radiospektakley-chast-1-sbornik-audiospektakley
+        : parsedContent.title;
+    var path = replacePathChars(rawDirectory);
     var fileRelativePath = path + "/" + filename;
     queue.push({url: url, filename: fileRelativePath, conflictAction: 'overwrite'});
 }
