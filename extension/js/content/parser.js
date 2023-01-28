@@ -43,15 +43,23 @@ function getBookCover() {
 
 function getURLs(bookId, data) {
     const baseURL = `${data.srv}b/${bookId}/${data.key}/`;
-    return data.items
-        .map(item => item.file)
-        .nub()
-        .map(file => {
-            // note: filenames have a two-digit one-based index
-            // a long book to see the URLs is: https://akniga.org/tolstoy-lev-voyna-i-mir-1
-            const index = file.toString().padStart(2, '0');
-            return `${baseURL}${index}. ${data.title}.mp3`
-        })
+
+    const newURLFormat = data.slug != null;
+
+    return newURLFormat
+        // even some long books use this new, single-file format now,
+        // for example: 58 hours — https://akniga.org/tolstoy-lev-voyna-i-mir-1
+        ? [`${baseURL}${data.slug}.mp3`]
+        // but some longer books use the old, multi-file format,
+        // for example: 92.5 hours — https://akniga.org/zolotoy-fond-radiospektakley-chast-1-sbornik-audiospektakley
+        : data.items
+            .map(item => item.file)
+            .nub()
+            .map(file => {
+                // note: filenames have a two-digit one-based index
+                const index = file.toString().padStart(2, '0');
+                return `${baseURL}${index}. ${data.title}.mp3`
+            })
 }
 
 // Removes sequentially-duplicated values leaving only the first from each group.
