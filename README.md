@@ -28,9 +28,15 @@
 
 ![filemanager.png](readme/filemanager.png)
 
+## Build
+
+```shell
+rm -fr audioknigi_donloader.zip
+zip -r audioknigi_donloader.zip extension
+```
+
 ## Источники и лицензии
 
 Иконки взяты [здесь](http://www.iconarchive.com/show/small-n-flat-icons-by-paomedia/book-bookmark-icon.html).
 
 Лицензия: [Mozilla Public License, version 2.0](https://www.mozilla.org/en-US/MPL/2.0/)
-
