@@ -32,7 +32,7 @@
 
 ```shell
 rm -fr audioknigi_donloader.zip
-zip -r audioknigi_donloader.zip extension
+cd extension && zip -r "../audioknigi_donloader.zip" .
 ```
 
 ## Источники и лицензии
