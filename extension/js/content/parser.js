@@ -12,14 +12,16 @@ function loadBookData(onSuccess) {
     });
 }
 
+// the encryption key is taken from the webpage's js file and seems to be static
+const encryptionKey = 'EKxtcg46V';
+
 // Makes an AJAX request to get information about the book with `bookId`.
 // `onSuccess` is called if the request has succeeded, its parameter is parsed JSON response.
 function requestBookData(bookId, onSuccess) {
     // note: `LIVESTREET_SECURITY_KEY` is set in the HTML page and it's correlated with the user's cookie
     // the request below works because the browser sends the user's cookie along with our data
     const securityKey = retrieveWindowVariables(['LIVESTREET_SECURITY_KEY']).LIVESTREET_SECURITY_KEY;
-    // the encryption key is taken from the webpage's js file and seems to be static
-    const encryptedHash = CryptoJS.AES.encrypt(JSON.stringify(securityKey), 'EKxtcg46V', { format:JsonFormatter }).toString();
+    const encryptedHash = CryptoJS.AES.encrypt(JSON.stringify(securityKey), encryptionKey, { format:JsonFormatter }).toString();
 
     $.post('https://akniga.org/ajax/b/' + bookId,
         { bid: bookId, hash: encryptedHash, security_ls_key: securityKey },
@@ -42,6 +44,19 @@ function getBookCover() {
 }
 
 function getURLs(bookId, data) {
+    // now (most?) books use this newer way of getting the URL
+    // for example: https://akniga.org/azimov-ayzek-mesto-gde-mnogo-vody-3
+    if (data.res) {
+      // this is adapted from the website's javascript code
+      const fileVersion = data.version > 1 ? `&v=${data.version}` : '';
+      // `JSON.parse` is needed because the encrypted url is json-encoded
+      // (wrapped in quotes and contains escaped slashes)
+      const fileURL = JSON.parse(
+          CryptoJS.AES.decrypt(data.res, encryptionKey, { format: JsonFormatter }).toString(CryptoJS.enc.Utf8)
+      ) + fileVersion;
+      return [fileURL];
+    }
+
     const baseURL = `${data.srv}b/${bookId}/${data.key}/`;
 
     const newURLFormat = data.slug != null;
