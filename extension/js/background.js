@@ -44,7 +44,7 @@ function watchQueuedItems() {
 }
 
 function replacePathChars(path) {
-    return path.replace(/[~!@#$%^&*()_|+=?;:'",<>\{\}\[\]\\\/`]/g, "_");
+    return path.replace(/[~!@#$%^&*()_|+=?;:'"<>\{\}\[\]\\\/`]/g, "_");
 }
 
 function pushQueueItem(filename, url) {
