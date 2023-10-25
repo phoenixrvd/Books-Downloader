@@ -62,8 +62,10 @@ function getURLs(bookId, data) {
     const newURLFormat = data.slug != null;
 
     return newURLFormat
-        // even some long books use this new, single-file format now,
-        // for example: 58 hours — https://akniga.org/tolstoy-lev-voyna-i-mir-1
+        // this previous "new URL format" seems to be broken because there is no
+        // `key` even if there is `slug`
+        // (previous example: 58 hours — https://akniga.org/tolstoy-lev-voyna-i-mir-1
+        // now uses the `res` value above)
         ? [`${baseURL}${data.slug}.mp3`]
         // but some longer books use the old, multi-file format,
         // for example: 92.5 hours — https://akniga.org/zolotoy-fond-radiospektakley-chast-1-sbornik-audiospektakley
