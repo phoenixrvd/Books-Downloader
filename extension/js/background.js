@@ -44,7 +44,7 @@ function watchQueuedItems() {
 }
 
 function replacePathChars(path) {
-    return path.replace(/[~!@#$%^&*()_|+=?;:'",<>\{\}\[\]\\\/`]/g, "_");
+    return path.replace(/[~!@#$%^&*()_|+=?;:'"<>\{\}\[\]\\\/`]/g, "_");
 }
 
 function pushQueueItem(filename, url) {
@@ -86,7 +86,7 @@ function downloadContent() {
 
     // Add all MP3 Tracks
     for (const trackUrl of parsedContent.files) {
-        var filename = replacePathChars(trackUrl.basename());
+        var filename = replacePathChars(new URL(trackUrl).basename());
         pushQueueItem(filename, trackUrl);
     }
 
@@ -94,10 +94,11 @@ function downloadContent() {
     watchQueuedItems();
 }
 
-// Returns the filename or directory portion of pathname.
-// E.g. `"foo/bar.baz".basename() == "bar.baz"`, `"foobar".basename() == "foobar"`.
-String.prototype.basename = function() {
-    return this.substr(this.lastIndexOf('/') + 1);
+// Returns the filename portion (the string after the last `/`) of URL's pathname.
+// E.g. `new URL('https://example.org/b/foo/bar.baz.mp3?param=yes').basename() == "bar.baz.mp3"`
+URL.prototype.basename = function() {
+    const path = this.pathname;
+    return path.substr(path.lastIndexOf('/') + 1);
 }
 
 function buttonDisable(tabId) {
