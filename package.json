@@ -23,7 +23,7 @@
       "test:parser": "test of data parsed data (fetch stub furst)",
       "test:stub": "fetch of currently page",
       "dist:sandbox": "start browser with 2 tabs: desktop an mobile",
-      "dist:zip": "pack the extension into zip file (firefox - Extension)"
+      "dist:zip": "pack the shared Chrome and Firefox extension into a zip file"
     }
   }
 }
