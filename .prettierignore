@@ -1,0 +1,12 @@
+node_modules/
+package-lock.json
+tsconfig*.tsbuildinfo
+dist/
+dev-dist/
+coverage/
+.data/
+.idea/
+.vscode/
+extension/js/content/*.min.js
+test/cache/
+README.md

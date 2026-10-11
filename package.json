@@ -7,9 +7,12 @@
     "jsdom": "^15.1.1",
     "mocha": "^6.1.4",
     "puppeteer": "^1.18.1",
-    "zip-folder": "^1.0.0"
+    "zip-folder": "^1.0.0",
+    "prettier": "^3.9.10"
   },
   "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test:parser": "mocha",
     "test:stub": "node scripts/stub.js",
     "dist:sandbox": "node scripts/sandbox.js",
