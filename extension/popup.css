@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --background: #ffffff;
   --text: #1f2937;
   --error: #b91c1c;
@@ -8,6 +8,17 @@
   --focus: #2563eb;
   background: var(--background);
   color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827;
+    --text: #f3f4f6;
+    --error: #fca5a5;
+    --button: #1d4ed8;
+    --button-hover: #2563eb;
+    --focus: #93c5fd;
+  }
 }
 
 body {
@@ -24,7 +35,7 @@ h1 {
 }
 .book-layout {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 16px;
 }
 .book-details {
@@ -32,6 +43,10 @@ h1 {
   flex-direction: column;
   flex: 1;
   min-width: 0;
+}
+#download {
+  margin-top: auto;
+  align-self: flex-start;
 }
 #book {
   margin-top: 0;
