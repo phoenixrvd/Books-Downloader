@@ -10,6 +10,11 @@ function loadBookData(onSuccess, onError) {
     bookId,
     (content) => {
       try {
+        if (getBookId() !== bookId) {
+          const error = new Error(chrome.i18n.getMessage("bookChanged"));
+          error.code = "STALE_PAGE";
+          throw error;
+        }
         const pageData = preparePageData(content);
         if (
           !pageData.files.length ||
