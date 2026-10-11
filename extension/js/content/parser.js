@@ -71,7 +71,9 @@ function requestBookData(bookId, onSuccess, onError) {
       });
       if (!response.ok)
         throw new Error(chrome.i18n.getMessage("bookLoadFailed"));
-      return await response.json();
+      // Parse in the content-script realm: Firefox can expose response.json()
+      // objects through Xray wrappers that reject locally created properties.
+      return JSON.parse(await response.text());
     } finally {
       clearTimeout(timeout);
     }
@@ -150,20 +152,17 @@ function getURLs(bookId, data) {
       [`${baseURL}${data.slug}.mp3`]
     : // but some longer books use the old, multi-file format,
       // for example: 92.5 hours — https://akniga.org/zolotoy-fond-radiospektakley-chast-1-sbornik-audiospektakley
-      data.items
-        .map((item) => item.file)
-        .nub()
-        .map((file) => {
-          // note: filenames have a two-digit one-based index
-          const index = file.toString().padStart(2, "0");
-          return `${baseURL}${index}. ${data.title}.mp3`;
-        });
+      nub(data.items.map((item) => item.file)).map((file) => {
+        // note: filenames have a two-digit one-based index
+        const index = file.toString().padStart(2, "0");
+        return `${baseURL}${index}. ${data.title}.mp3`;
+      });
 }
 
 // Removes sequentially-duplicated values leaving only the first from each group.
-// E.g. `[1, 1, 1, 2, 2, 3, 1, 4, 4].nub() == [1, 2, 3, 1, 4]`.
-Array.prototype.nub = function () {
-  return this.reduce(function (acc, item) {
+// E.g. `nub([1, 1, 1, 2, 2, 3, 1, 4, 4]) == [1, 2, 3, 1, 4]`.
+function nub(items) {
+  return items.reduce(function (acc, item) {
     if (acc.length == 0) {
       return [item];
     } else {
@@ -175,7 +174,7 @@ Array.prototype.nub = function () {
       }
     }
   }, []);
-};
+}
 
 function preparePageData(response) {
   const bookId = getBookId();

@@ -72,7 +72,7 @@ it("fetches a player token and decrypts the MP3 address", async function () {
   const requests = [];
   context.fetch = async (url, options) => {
     requests.push({ url, ...options });
-    return { ok: true, json: async () => responses.shift() };
+    return { ok: true, text: async () => JSON.stringify(responses.shift()) };
   };
   const book = await new Promise((resolve, reject) =>
     context.loadBookData(resolve, reject),
@@ -87,11 +87,58 @@ it("fetches a player token and decrypts the MP3 address", async function () {
   dom.window.close();
 });
 
+it("parses responses locally without mutating Firefox Xray objects", async function () {
+  const { dom, context } = parser();
+  const responses = [
+    { token: "token" },
+    {
+      srv: "https://audio.example/",
+      key: "audio-key",
+      title: "Book",
+      items: '[{"file":1},{"file":1},{"file":2},{"file":1}]',
+    },
+  ];
+  context.fetch = async () => {
+    const data = responses.shift();
+    return {
+      ok: true,
+      text: async () => JSON.stringify(data),
+      json: async () =>
+        new Proxy(data, {
+          set() {
+            throw new Error(
+              "Not allowed to define cross-origin object as property on [Object] or [Array] XrayWrapper",
+            );
+          },
+        }),
+    };
+  };
+  try {
+    const book = await new Promise((resolve, reject) =>
+      context.loadBookData(resolve, reject),
+    );
+    assert.deepStrictEqual(Array.from(book.files), [
+      "https://audio.example/b/123/audio-key/01. Book.mp3",
+      "https://audio.example/b/123/audio-key/02. Book.mp3",
+      "https://audio.example/b/123/audio-key/01. Book.mp3",
+    ]);
+    assert.strictEqual(
+      vm.runInContext(
+        'Object.hasOwnProperty.call(Array.prototype, "nub")',
+        context,
+      ),
+      false,
+    );
+  } finally {
+    dom.window.close();
+  }
+});
+
 it("handles failed requests and missing tokens", async function () {
   const { dom, context } = parser();
   for (const response of [
     { ok: false },
-    { ok: true, json: async () => ({ error: true }) },
+    { ok: true, text: async () => JSON.stringify({ error: true }) },
   ]) {
     context.fetch = async () => response;
     const error = await new Promise((resolve) =>
