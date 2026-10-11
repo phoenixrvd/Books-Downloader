@@ -1,14 +1,31 @@
-function loadBookData(onSuccess) {
+function loadBookData(onSuccess, onError) {
   var bookId = getBookId();
 
   if (typeof bookId === "undefined") {
+    onSuccess(null);
     return;
   }
 
-  requestBookData(bookId, (content) => {
-    const pageData = preparePageData(content);
-    onSuccess(pageData);
-  });
+  requestBookData(
+    bookId,
+    (content) => {
+      try {
+        const pageData = preparePageData(content);
+        if (
+          !pageData.files.length ||
+          pageData.files.some(
+            (url) => !/^https?:\/\//.test(url) || url.includes("/undefined/"),
+          )
+        ) {
+          throw new Error(chrome.i18n.getMessage("invalidAudioURL"));
+        }
+        onSuccess(pageData);
+      } catch (error) {
+        onError(error);
+      }
+    },
+    onError,
+  );
 }
 
 // the encryption key is taken from the webpage's js file and seems to be static
@@ -16,30 +33,57 @@ const encryptionKey = "EKxtcg46V";
 
 // Makes an AJAX request to get information about the book with `bookId`.
 // `onSuccess` is called if the request has succeeded, its parameter is parsed JSON response.
-function requestBookData(bookId, onSuccess) {
+function requestBookData(bookId, onSuccess, onError) {
   // note: `LIVESTREET_SECURITY_KEY` is set in the HTML page and it's correlated with the user's cookie
   // the request below works because the browser sends the user's cookie along with our data
   const securityKey = retrieveWindowVariables([
     "LIVESTREET_SECURITY_KEY",
   ]).LIVESTREET_SECURITY_KEY;
-  const encryptedHash = CryptoJS.AES.encrypt(
-    JSON.stringify(securityKey),
-    encryptionKey,
-    { format: JsonFormatter },
-  ).toString();
-
-  $.post(
-    "https://akniga.org/ajax/b/" + bookId,
-    { bid: bookId, hash: encryptedHash, security_ls_key: securityKey },
-    (response) => {
-      // the response is already parsed into a JSON object, however its
-      // `items` property is still a string containing more JSON data, so
-      // we parse it here
-      var parsedResponse = response;
-      parsedResponse.items = JSON.parse(response.items);
-      onSuccess(parsedResponse);
-    },
-  );
+  const fail = (error) =>
+    onError(
+      error instanceof Error
+        ? error
+        : new Error(chrome.i18n.getMessage("bookLoadFailed")),
+    );
+  if (!securityKey) {
+    fail(new Error(chrome.i18n.getMessage("securityKeyMissing")));
+    return;
+  }
+  const post = (endpoint, data) =>
+    $.ajax({
+      url: "https://akniga.org/ajax/" + endpoint,
+      type: "POST",
+      dataType: "json",
+      timeout: 20000,
+      data: Object.assign({ security_ls_key: securityKey }, data),
+    });
+  post("player/token", { bid: bookId, ts: Date.now() })
+    .done((result) => {
+      if (!result || result.error || result.bStateError || !result.token) {
+        fail(new Error(chrome.i18n.getMessage("tokenMissing")));
+        return;
+      }
+      post("b/" + bookId, { bid: bookId, token: result.token, hls: "false" })
+        .done((response) => {
+          try {
+            if (!response || response.error || response.bStateError) {
+              throw new Error(chrome.i18n.getMessage("bookLoadFailed"));
+            }
+            response.items =
+              typeof response.items === "string"
+                ? JSON.parse(response.items)
+                : response.items;
+            if (!Array.isArray(response.items) || !response.items.length) {
+              throw new Error(chrome.i18n.getMessage("noAudioData"));
+            }
+            onSuccess(response);
+          } catch (error) {
+            fail(error);
+          }
+        })
+        .fail(fail);
+    })
+    .fail(fail);
 }
 
 function getBookId() {
@@ -67,6 +111,9 @@ function getURLs(bookId, data) {
     return [fileURL];
   }
 
+  if (!data.srv || !data.key) {
+    throw new Error(chrome.i18n.getMessage("invalidAudioURL"));
+  }
   const baseURL = `${data.srv}b/${bookId}/${data.key}/`;
 
   const newURLFormat = data.slug != null;
@@ -185,34 +232,18 @@ if ($(".layout--template-acl10-mobile").length > 0) {
 function retrieveWindowVariables(variables) {
   var ret = {};
 
-  var scriptContent = "";
-  for (var i = 0; i < variables.length; i++) {
-    var currVariable = variables[i];
-    scriptContent +=
-      "if (typeof " +
-      currVariable +
-      " !== 'undefined') $('body').attr('tmp_" +
-      currVariable +
-      "', " +
-      currVariable +
-      ");\n";
+  // Read the page's inline configuration without injecting executable code
+  // (inline injection can be blocked by the page's CSP).
+  const scripts = Array.from(document.querySelectorAll("script:not([src])"));
+  for (const variable of variables) {
+    if (variable !== "LIVESTREET_SECURITY_KEY") continue;
+    for (const script of scripts) {
+      const match = script.textContent.match(
+        /\bLIVESTREET_SECURITY_KEY\s*=\s*['"]([^'"]+)['"]/,
+      );
+      if (match) ret[variable] = match[1];
+    }
   }
-
-  var script = document.createElement("script");
-  script.id = "tmpScript";
-  script.appendChild(document.createTextNode(scriptContent));
-  (document.body || document.head || document.documentElement).appendChild(
-    script,
-  );
-
-  for (var i = 0; i < variables.length; i++) {
-    var currVariable = variables[i];
-    ret[currVariable] = $("body").attr("tmp_" + currVariable);
-    $("body").removeAttr("tmp_" + currVariable);
-  }
-
-  $("#tmpScript").remove();
-
   return ret;
 }
 
