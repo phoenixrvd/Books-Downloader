@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="book-layout">
+      <img id="cover" alt="" hidden />
+      <h1 id="book" hidden></h1>
+    </div>
+    <dl id="metadata" hidden></dl>
+    <p id="status" role="status" aria-live="polite" data-i18n="loadingBook"></p>
+    <button id="download" disabled data-i18n="buttonTitle"></button>
+    <section id="individual-downloads" hidden>
+      <h2 data-i18n="individualDownloads"></h2>
+      <ul id="files"></ul>
+    </section>
+    <script src="js/popup.js"></script>
+  </body>
+</html>

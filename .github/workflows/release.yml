@@ -4,10 +4,13 @@ on:
   push:
     branches: [master]
     paths:
-      - "extension/**"
       - "scripts/**"
       - "test/**"
       - "package.json"
+      - "package-lock.json"
+      - "src/**"
+      - "tsconfig*.json"
+      - ".nvmrc"
       - ".github/workflows/release.yml"
   workflow_dispatch:
 
@@ -33,7 +36,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
+          cache: npm
 
       - name: Read release version from extension manifest
         id: version
@@ -41,7 +45,7 @@ jobs:
         run: |
           node <<'NODE'
           const fs = require('fs');
-          const { version } = JSON.parse(fs.readFileSync('extension/manifest.json', 'utf8'));
+          const { version } = JSON.parse(fs.readFileSync('src/extension/manifest.json', 'utf8'));
           if (typeof version !== 'string' || !/^\d+(\.\d+){0,3}$/.test(version)) {
             throw new Error('Invalid extension manifest version');
           }
@@ -65,18 +69,20 @@ jobs:
 
       - name: Install build and test dependencies
         if: steps.existing.outputs.exists != 'true'
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Test extension
         if: steps.existing.outputs.exists != 'true'
-        # The legacy parser tests require local, untracked HTML snapshots.
         run: |
-          npm run sync:deps
-          npx --no-install mocha test/extension.js
+          npm run format:check
+          npm run typecheck
+          npm test
 
       - name: Build shared Chrome and Firefox package
         if: steps.existing.outputs.exists != 'true'
-        run: npm run dist:zip
+        run: |
+          npm run build
+          npm run dist:zip
 
       - name: Publish GitHub release with shared package
         if: steps.existing.outputs.exists != 'true'
@@ -85,8 +91,18 @@ jobs:
           RELEASE_COMMIT: ${{ github.sha }}
         shell: bash
         run: |
+          export RELEASE_NOTES_FILE="$RUNNER_TEMP/extension-release-notes.md"
+          node <<'NODE'
+          const fs = require('fs');
+          const { execFileSync } = require('child_process');
+          const message = execFileSync('git', [
+            'show', '--no-patch', '--format=%B', process.env.RELEASE_COMMIT,
+          ], { encoding: 'utf8' }).trim();
+          fs.writeFileSync(process.env.RELEASE_NOTES_FILE, message + '\n');
+          NODE
           gh release create "$RELEASE_TAG" \
             --target "$RELEASE_COMMIT" \
             --title "$RELEASE_TAG" \
             --generate-notes \
+            --notes-file "$RELEASE_NOTES_FILE" \
             'audioknigi_donloader.zip#Chrome and Firefox extension'

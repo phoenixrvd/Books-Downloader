@@ -1,29 +1,48 @@
 {
   "name": "audioknigi_donloader",
+  "license": "MIT",
   "devDependencies": {
-    "fs-extra": "^8.1.0",
-    "jsdom": "^15.1.1",
-    "mocha": "^6.1.4",
+    "@types/chrome": "^0.1.43",
+    "@types/crypto-js": "^4.2.2",
+    "@types/jsdom": "^21.1.7",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.5",
+    "esbuild": "^0.25.12",
+    "fflate": "^0.8.3",
+    "jsdom": "^26.1.0",
+    "mocha": "^11.7.0",
     "prettier": "^3.9.10",
-    "puppeteer": "^1.18.1",
-    "zip-folder": "^1.0.0"
+    "puppeteer-core": "^24.43.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
   },
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "firefox:android": "npx web-ext run --source-dir ./dist --target firefox-android --adb-bin \"$HOME/Android/Sdk/platform-tools/adb\" --adb-device emulator-5554 --firefox-apk org.mozilla.firefox",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "mocha --import=tsx \"test/**/*.test.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "sync:deps": "node scripts/sync-deps.js",
-    "test:parser": "mocha",
-    "test:stub": "node scripts/stub.js",
-    "predist:zip": "npm run sync:deps",
-    "dist:sandbox": "node scripts/sandbox.js",
-    "dist:zip": "node scripts/zip.js"
+    "fixtures:capture": "node scripts/capture-fixtures.mjs",
+    "dist:sandbox": "node scripts/sandbox.mjs",
+    "dist:zip": "node scripts/package.mjs"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "config": {
     "scripts": {
-      "test:parser": "test extension and cached page parsing",
-      "test:stub": "fetch of currently page",
-      "dist:sandbox": "start browser with 2 tabs: desktop an mobile",
-      "dist:zip": "pack the shared Chrome and Firefox extension into a zip file"
+      "build": "build the extension into dist/",
+      "watch": "build the extension and rebuild scripts on source changes",
+      "firefox:android": "load dist/ in Firefox on Android emulator-5554 via ADB",
+      "typecheck": "check TypeScript types in source and tests",
+      "test": "run all tests offline",
+      "format": "format project files with Prettier",
+      "format:check": "check formatting without changing files",
+      "fixtures:capture": "capture minimal book DOM for fixture review",
+      "dist:sandbox": "load dist/ in Chromium with desktop and mobile page views",
+      "dist:zip": "pack existing dist/ into audioknigi_donloader.zip"
     }
   },
   "dependencies": {

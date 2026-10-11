@@ -7,7 +7,6 @@ coverage/
 .data/
 .idea/
 .vscode/
-extension/js/content/*.min.js
-extension/js/content/crypto-js.js
 test/cache/
+test/fixtures/
 README.md

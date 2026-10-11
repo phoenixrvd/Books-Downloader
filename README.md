@@ -37,8 +37,13 @@
 
 Иконки взяты [здесь](http://www.iconarchive.com/show/small-n-flat-icons-by-paomedia/book-bookmark-icon.html).
 
-Лицензия: [Mozilla Public License, version 2.0](https://www.mozilla.org/en-US/MPL/2.0/)
+Лицензия: [MIT](LICENSE)
 
 ## Development
 
-Run `npm install` and `npm run sync:deps` after updating dependencies. The latter copies the npm-managed CryptoJS bundle into the extension for loading as a content script. `npm run dist:zip` syncs it automatically before packaging.
+```sh
+npm ci
+npm run build
+npm run watch
+npm run dist:zip
+```

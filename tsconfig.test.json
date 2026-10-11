@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["chrome", "node", "mocha"] },
+  "include": ["src/**/*.ts", "test/**/*.test.ts"]
+}
