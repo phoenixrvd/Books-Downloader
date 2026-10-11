@@ -1,0 +1,90 @@
+name: Publish extension release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "extension/**"
+      - "scripts/**"
+      - "test/**"
+      - "package.json"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: extension-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Read release version from extension manifest
+        id: version
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const { version } = JSON.parse(fs.readFileSync('extension/manifest.json', 'utf8'));
+          if (typeof version !== 'string' || !/^\d+(\.\d+){0,3}$/.test(version)) {
+            throw new Error('Invalid extension manifest version');
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `tag=v${version}\n`);
+          NODE
+
+      - name: Check whether the release already exists
+        id: existing
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          # Verify repository access first, so authentication errors fail the job.
+          gh api "repos/$GH_REPO" --silent
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+            echo "Release $RELEASE_TAG already exists; skipping publication."
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install build and test dependencies
+        if: steps.existing.outputs.exists != 'true'
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Test extension
+        if: steps.existing.outputs.exists != 'true'
+        # The legacy parser tests require local, untracked HTML snapshots.
+        run: npx --no-install mocha test/extension.js
+
+      - name: Build shared Chrome and Firefox package
+        if: steps.existing.outputs.exists != 'true'
+        run: npm run dist:zip
+
+      - name: Publish GitHub release with shared package
+        if: steps.existing.outputs.exists != 'true'
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        shell: bash
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --target "$RELEASE_COMMIT" \
+            --title "$RELEASE_TAG" \
+            --generate-notes \
+            'audioknigi_donloader.zip#Chrome and Firefox extension'
