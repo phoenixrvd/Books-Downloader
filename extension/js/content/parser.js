@@ -56,7 +56,7 @@ function requestBookData(bookId, onSuccess, onError) {
   }
   const post = (endpoint, data) =>
     $.ajax({
-      url: "https://akniga.org/ajax/" + endpoint,
+      url: SITE_URL + "ajax/" + endpoint,
       type: "POST",
       dataType: "json",
       timeout: 20000,

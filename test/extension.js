@@ -45,6 +45,7 @@ function parser() {
     chrome: { i18n: i18n() },
     console: log,
   });
+  run(context, "constants.js");
   run(context, "content/crypto-js.min.js");
   run(context, "content/parser.js");
   return { dom, context };
@@ -123,6 +124,7 @@ it("localizes the popup and keeps a shared browser manifest", async function () 
     fs.readFileSync("extension/manifest.json", "utf8"),
   );
   assert.deepStrictEqual(manifest.background.scripts, [
+    "js/constants.js",
     manifest.background.service_worker,
   ]);
   for (const locale of ["ru", "de"]) {
@@ -135,6 +137,12 @@ it("localizes the popup and keeps a shared browser manifest", async function () 
         storage: { onChanged: event },
       },
     });
+    run(context, "constants.js");
+    const siteURL = vm.runInContext("SITE_URL", context);
+    assert.deepStrictEqual(manifest.host_permissions, [siteURL + "*"]);
+    assert.deepStrictEqual(manifest.content_scripts[0].matches, [
+      siteURL + "*",
+    ]);
     await run(context, "popup.js");
     context.render({
       content: { title: "Book", image: "https://example.org/cover.jpg" },
@@ -227,6 +235,11 @@ it("downloads MP3s first, continues after cover errors and supports Firefox desc
       console: log,
       setTimeout() {},
     });
+    if (firefox) {
+      run(context, "constants.js");
+    } else {
+      context.importScripts = (file) => run(context, file);
+    }
     run(context, "background.js");
     await context.handleMessage({ type: "download", tabId: 7 }, {});
     for (let i = 0; i < 100; i++) await Promise.resolve();

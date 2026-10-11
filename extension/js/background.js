@@ -1,3 +1,6 @@
+// Service workers load shared constants here; Firefox loads them via the manifest.
+if (typeof importScripts === "function") importScripts("constants.js");
+
 // Firefox's browser namespace consistently provides Promise-based APIs.
 var chrome = typeof browser !== "undefined" ? browser : globalThis.chrome;
 const action = chrome.action || chrome.browserAction;
@@ -378,7 +381,7 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
   if (!changeInfo.url) return;
   await ready;
-  if (!changeInfo.url.startsWith("https://akniga.org/")) {
+  if (!changeInfo.url.startsWith(SITE_URL)) {
     await setState(tabId, { content: null });
     return;
   }

@@ -20,6 +20,7 @@
       "matches": ["https://akniga.org/*"],
       "run_at": "document_end",
       "js": [
+        "js/constants.js",
         "js/content/jquery-3.4.1.min.js",
         "js/content/crypto-js.min.js",
         "js/content/parser.js",
@@ -29,7 +30,7 @@
   ],
   "background": {
     "service_worker": "js/background.js",
-    "scripts": ["js/background.js"]
+    "scripts": ["js/constants.js", "js/background.js"]
   },
   "permissions": ["downloads", "storage", "alarms"],
   "host_permissions": ["https://akniga.org/*"],

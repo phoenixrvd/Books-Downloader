@@ -69,7 +69,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     tabId = tabs[0].id;
-    if (!tabs[0].url || !tabs[0].url.startsWith("https://akniga.org/")) {
+    if (!tabs[0].url || !tabs[0].url.startsWith(SITE_URL)) {
       render({ message: chrome.i18n.getMessage("openBookPage") });
       return;
     }
