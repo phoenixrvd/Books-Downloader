@@ -54,22 +54,36 @@ function requestBookData(bookId, onSuccess, onError) {
     fail(new Error(chrome.i18n.getMessage("securityKeyMissing")));
     return;
   }
-  const post = (endpoint, data) =>
-    $.ajax({
-      url: SITE_URL + "ajax/" + endpoint,
-      type: "POST",
-      dataType: "json",
-      timeout: 20000,
-      data: Object.assign({ security_ls_key: securityKey }, data),
-    });
+  const post = async (endpoint, data) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(SITE_URL + "ajax/" + endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest",
+          Accept: "application/json, text/javascript, */*; q=0.01",
+        },
+        body: new URLSearchParams({ security_ls_key: securityKey, ...data }),
+        signal: controller.signal,
+      });
+      if (!response.ok)
+        throw new Error(chrome.i18n.getMessage("bookLoadFailed"));
+      return await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
   post("player/token", { bid: bookId, ts: Date.now() })
-    .done((result) => {
+    .then((result) => {
       if (!result || result.error || result.bStateError || !result.token) {
         fail(new Error(chrome.i18n.getMessage("tokenMissing")));
         return;
       }
       post("b/" + bookId, { bid: bookId, token: result.token, hls: "false" })
-        .done((response) => {
+        .then((response) => {
           try {
             if (!response || response.error || response.bStateError) {
               throw new Error(chrome.i18n.getMessage("bookLoadFailed"));
@@ -86,17 +100,22 @@ function requestBookData(bookId, onSuccess, onError) {
             fail(error);
           }
         })
-        .fail(fail);
+        .catch(fail);
     })
-    .fail(fail);
+    .catch(fail);
 }
 
 function getBookId() {
-  return $("article").attr("data-bid");
+  return (
+    document.querySelector("article")?.getAttribute("data-bid") ?? undefined
+  );
 }
 
 function getBookCover() {
-  return $("article .book--cover img").attr("src");
+  return (
+    document.querySelector("article .book--cover img")?.getAttribute("src") ??
+    undefined
+  );
 }
 
 function getURLs(bookId, data) {
@@ -176,58 +195,64 @@ function preparePageData(response) {
 }
 
 function getDescriptionTextMobile() {
-  var description = $(".topic-content").clone();
-  description.find(".topic-content-right,.ya-share2").remove();
-  return description.text().trim();
+  const description = document.querySelector(".topic-content")?.cloneNode(true);
+  if (!description) return "";
+  description
+    .querySelectorAll(".topic-content-right,.ya-share2")
+    .forEach((element) => element.remove());
+  return description.textContent.trim();
 }
 
 function getMetaDataMobile() {
-  var data = [];
-  var $meta = $(".book-info");
-
-  $meta.find(".fa").remove();
-  $meta.find(".item-info").each(function () {
-    var $this = $(this);
-    data.push($this.text().trim().replace(/\s+/, " "));
-  });
-
-  return data;
+  const meta = document.querySelector(".book-info")?.cloneNode(true);
+  if (!meta) return [];
+  meta.querySelectorAll(".fa").forEach((element) => element.remove());
+  return Array.from(meta.querySelectorAll(".item-info"), (item) =>
+    item.textContent.trim().replace(/\s+/, " "),
+  );
 }
 
 function getDescriptionText() {
-  const desc = $(
-    "article .description__article-main:not(.caption__article--about-block-samebook)",
-  )
-    .first()
-    .clone();
-  desc.find("div").remove();
-  return desc.text().trim();
+  const desc = document
+    .querySelector(
+      "article .description__article-main:not(.caption__article--about-block-samebook)",
+    )
+    ?.cloneNode(true);
+  if (!desc) return "";
+  desc.querySelectorAll("div").forEach((element) => element.remove());
+  return desc.textContent.trim();
 }
 
 function getMetaData() {
   // this should select the top metadata fields (Author, Performer, Rating, Duration, optional Year)
   // except for Alternative performances
-  var $about = $(
+  const about = document.querySelectorAll(
     ".caption__article--about-block:not(.caption__article--about-block-samebook)",
-  ).clone();
-  $about.find(".tooltip__main").remove();
-  const metadata = $about.toArray().map((div) =>
-    $(div)
-      .text()
+  );
+  const metadata = Array.from(about, (div) => {
+    const copy = div.cloneNode(true);
+    copy
+      .querySelectorAll(".tooltip__main")
+      .forEach((element) => element.remove());
+    return copy.textContent
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-      .join(": "),
-  );
+      .join(": ");
+  });
 
   const classifiers = [
-    $("article .classifiers__article-main").text().trim().replace(/ +/g, " "),
+    Array.from(document.querySelectorAll("article .classifiers__article-main"))
+      .map((element) => element.textContent)
+      .join("")
+      .trim()
+      .replace(/ +/g, " "),
   ];
 
   return metadata.concat(classifiers);
 }
 
-if ($(".layout--template-acl10-mobile").length > 0) {
+if (document.querySelector(".layout--template-acl10-mobile")) {
   getDescriptionText = getDescriptionTextMobile;
   getMetaData = getMetaDataMobile;
 }

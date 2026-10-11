@@ -1,7 +1,7 @@
 {
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "manifest_version": 3,
   "minimum_chrome_version": "121",
   "default_locale": "ru",
@@ -21,8 +21,7 @@
       "run_at": "document_end",
       "js": [
         "js/constants.js",
-        "js/content/jquery-3.4.1.min.js",
-        "js/content/crypto-js.min.js",
+        "js/content/crypto-js.js",
         "js/content/parser.js",
         "js/content/loader.js"
       ]

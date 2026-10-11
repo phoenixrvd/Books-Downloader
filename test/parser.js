@@ -11,9 +11,9 @@ const extension_script_path = path.resolve(
   `${config.EXTENSION_PATH}/js/content/`,
 );
 
-function wrapJQueryContext(content_file) {
+function wrapPageContext(content_file) {
   let content = fs.readFileSync(`${page_path}/${content_file}`) + "";
-  let $ = require("jquery")(new JSDOM(content).window);
+  let document = new JSDOM(content).window.document;
   eval(fs.readFileSync(`${extension_script_path}/parser.js`) + "");
 
   return preparePageData({
@@ -34,13 +34,13 @@ function wrapJQueryContext(content_file) {
 }
 
 it("content generic", function () {
-  let content = wrapJQueryContext("desktop.html");
+  let content = wrapPageContext("desktop.html");
 
   assert.ok("50768" === content.id);
 });
 
 it("content desktop", function () {
-  let content = wrapJQueryContext("desktop.html");
+  let content = wrapPageContext("desktop.html");
 
   assert.ok(
     "https://akniga.org/uploads/media/topic/2019/06/28/11/preview/821258151e502731e8c6_400x.jpg" ===
@@ -57,7 +57,7 @@ it("content desktop", function () {
 });
 
 it("content mobile", function () {
-  let content = wrapJQueryContext("mobile.html");
+  let content = wrapPageContext("mobile.html");
 
   assert.ok(
     "https://akniga.org/uploads/media/topic/2019/06/28/11/preview/821258151e502731e8c6_400x.jpg" ===

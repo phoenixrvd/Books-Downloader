@@ -1,9 +1,7 @@
 {
   "name": "audioknigi_donloader",
-  "dependencies": {},
   "devDependencies": {
     "fs-extra": "^8.1.0",
-    "jquery": "^3.4.1",
     "jsdom": "^15.1.1",
     "mocha": "^6.1.4",
     "prettier": "^3.9.10",
@@ -13,8 +11,10 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "sync:deps": "node scripts/sync-deps.js",
     "test:parser": "mocha",
     "test:stub": "node scripts/stub.js",
+    "predist:zip": "npm run sync:deps",
     "dist:sandbox": "node scripts/sandbox.js",
     "dist:zip": "node scripts/zip.js"
   },
@@ -25,5 +25,8 @@
       "dist:sandbox": "start browser with 2 tabs: desktop an mobile",
       "dist:zip": "pack the shared Chrome and Firefox extension into a zip file"
     }
+  },
+  "dependencies": {
+    "crypto-js": "4.2.0"
   }
 }

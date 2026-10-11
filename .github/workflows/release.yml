@@ -70,7 +70,9 @@ jobs:
       - name: Test extension
         if: steps.existing.outputs.exists != 'true'
         # The legacy parser tests require local, untracked HTML snapshots.
-        run: npx --no-install mocha test/extension.js
+        run: |
+          npm run sync:deps
+          npx --no-install mocha test/extension.js
 
       - name: Build shared Chrome and Firefox package
         if: steps.existing.outputs.exists != 'true'

@@ -40,53 +40,85 @@ function parser() {
     document: dom.window.document,
     window: dom.window,
     location: dom.window.location,
-    $: require("jquery")(dom.window),
-    require,
+    fetch: async () => {
+      throw new Error("Unexpected request");
+    },
+    AbortController,
+    URLSearchParams,
+    setTimeout,
+    clearTimeout,
     chrome: { i18n: i18n() },
     console: log,
   });
   run(context, "constants.js");
-  run(context, "content/crypto-js.min.js");
+  run(context, "content/crypto-js.js");
   run(context, "content/parser.js");
   return { dom, context };
 }
 
-it("fetches a player token and decrypts the MP3 address", function () {
+it("fetches a player token and decrypts the MP3 address", async function () {
   const { dom, context } = parser();
   const url = "https://audio.example/book.mp3?res=test";
-  context.url = url;
-  const res = vm.runInContext(
-    "CryptoJS.AES.encrypt(JSON.stringify(url), encryptionKey, { format: JsonFormatter }).toString()",
-    context,
-  );
+  // Ciphertext generated with the previously bundled CryptoJS version.
+  const res = JSON.stringify({
+    ct: "7m5qOH/+HxlFMxxnmkfgMiH2m2JtemecNMlBSVH+3C7tY71vrHZyOqJ1U7yOXQxJ",
+    iv: "8a3d045e5b8f482b6a6377d75d26b373",
+    s: "0011223344556677",
+  });
   const responses = [
     { token: "token" },
     { res, items: '[{"file":1}]', titleonly: "Book" },
   ];
   const requests = [];
-  context.$.ajax = (options) => {
-    requests.push(options);
-    return {
-      done(callback) {
-        callback(responses.shift());
-        return this;
-      },
-      fail() {
-        return this;
-      },
-    };
+  context.fetch = async (url, options) => {
+    requests.push({ url, ...options });
+    return { ok: true, json: async () => responses.shift() };
   };
+  const book = await new Promise((resolve, reject) =>
+    context.loadBookData(resolve, reject),
+  );
+  assert.strictEqual(book.files[0], url);
+  assert.ok(requests[0].url.endsWith("/player/token"));
+  assert.strictEqual(requests[0].method, "POST");
+  assert.strictEqual(requests[0].headers["X-Requested-With"], "XMLHttpRequest");
+  assert.strictEqual(requests[1].body.get("token"), "token");
+  assert.strictEqual(requests[1].body.get("hls"), "false");
+  assert.strictEqual(requests[1].body.get("security_ls_key"), "key");
+  dom.window.close();
+});
+
+it("handles failed requests and missing tokens", async function () {
+  const { dom, context } = parser();
+  for (const response of [
+    { ok: false },
+    { ok: true, json: async () => ({ error: true }) },
+  ]) {
+    context.fetch = async () => response;
+    const error = await new Promise((resolve) =>
+      context.loadBookData(() => assert.fail("Unexpected book"), resolve),
+    );
+    assert.ok(error.message);
+  }
+  dom.window.close();
+});
+
+it("returns no book when the page has no book ID", function () {
+  const { dom, context } = parser();
+  dom.window.document.querySelector("article").removeAttribute("data-bid");
   context.loadBookData(
-    (book) => assert.strictEqual(book.files[0], url),
+    (book) => assert.strictEqual(book, null),
     (error) => {
       throw error;
     },
   );
-  assert.ok(requests[0].url.endsWith("/player/token"));
-  assert.strictEqual(requests[1].data.token, "token");
-  assert.strictEqual(requests[1].data.hls, "false");
-  assert.strictEqual(requests[1].data.security_ls_key, "key");
   dom.window.close();
+});
+
+it("ships the installed CryptoJS bundle", function () {
+  assert.strictEqual(
+    fs.readFileSync("extension/js/content/crypto-js.js", "utf8"),
+    fs.readFileSync(require.resolve("crypto-js/crypto-js"), "utf8"),
+  );
 });
 
 it("updates the book on in-page navigation and ignores stale requests", function () {

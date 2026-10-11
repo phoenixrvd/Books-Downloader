@@ -18,7 +18,9 @@ const path = require("path");
 
     // Remove JSS and CSS (cleanup)
     await page.evaluate(() => {
-      return window.$("script, style, link").remove();
+      document
+        .querySelectorAll("script, style, link")
+        .forEach((element) => element.remove());
     });
 
     // Store page to file
