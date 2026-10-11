@@ -6,6 +6,7 @@ let activeDownloads = {};
 let states = {};
 let watching = false;
 let nextJob = 0;
+const objectURLs = new Map();
 const ready = chrome.storage.local
   .get(["queue", "activeDownloads", "states"])
   .then((saved) => {
@@ -57,6 +58,31 @@ function replacePathChars(path) {
 
 function textURL(text, type = "text/plain") {
   return "data:" + type + ";charset=UTF-8," + encodeURIComponent(text);
+}
+
+function downloadOptions(options) {
+  const prepared = Object.assign({}, options);
+  // Firefox rejects data: downloads but its background document supports
+  // Blob URLs. Chrome's service worker has no createObjectURL and can use data:.
+  if (
+    prepared.url.startsWith("data:") &&
+    typeof Blob !== "undefined" &&
+    typeof URL.createObjectURL === "function"
+  ) {
+    const comma = prepared.url.indexOf(",");
+    const type = prepared.url.slice(5, comma);
+    const text = decodeURIComponent(prepared.url.slice(comma + 1));
+    prepared.url = URL.createObjectURL(new Blob([text], { type }));
+  }
+  return prepared;
+}
+
+function revokeDownloadURL(id) {
+  const url = objectURLs.get(id);
+  if (url) {
+    URL.revokeObjectURL(url);
+    objectURLs.delete(id);
+  }
 }
 
 function bookDownloads(content, tabId, jobId) {
@@ -162,9 +188,12 @@ async function watchQueuedItems() {
     let slots = Math.max(0, 3 - ownRunning.length);
     while (queue.length && slots-- > 0) {
       const item = queue.shift();
+      let prepared;
       let id;
       try {
-        id = await chrome.downloads.download(item.options);
+        prepared = downloadOptions(item.options);
+        id = await chrome.downloads.download(prepared);
+        if (prepared.url !== item.options.url) objectURLs.set(id, prepared.url);
         activeDownloads[id] = {
           tabId: item.tabId,
           jobId: item.jobId,
@@ -185,6 +214,8 @@ async function watchQueuedItems() {
           });
         }
       } catch (error) {
+        if (id === undefined && prepared && prepared.url !== item.options.url)
+          URL.revokeObjectURL(prepared.url);
         await failDownload(
           item.tabId,
           error.message,
@@ -215,6 +246,7 @@ async function handleDownloadChange(delta) {
   if (!owner) return;
   const { tabId, jobId, filename } = owner;
   delete activeDownloads[delta.id];
+  revokeDownloadURL(delta.id);
   if (delta.state.current === "interrupted") {
     await failDownload(
       tabId,
