@@ -6,9 +6,9 @@
     "jquery": "^3.4.1",
     "jsdom": "^15.1.1",
     "mocha": "^6.1.4",
+    "prettier": "^3.9.10",
     "puppeteer": "^1.18.1",
-    "zip-folder": "^1.0.0",
-    "prettier": "^3.9.10"
+    "zip-folder": "^1.0.0"
   },
   "scripts": {
     "format": "prettier --write .",
@@ -20,7 +20,7 @@
   },
   "config": {
     "scripts": {
-      "test:parser": "test of data parsed data (fetch stub furst)",
+      "test:parser": "test extension and cached page parsing",
       "test:stub": "fetch of currently page",
       "dist:sandbox": "start browser with 2 tabs: desktop an mobile",
       "dist:zip": "pack the shared Chrome and Firefox extension into a zip file"
