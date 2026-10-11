@@ -190,7 +190,11 @@ function getMetaDataMobile() {
 }
 
 function getDescriptionText() {
-  const desc = $("article .description__article-main:first()").clone();
+  const desc = $(
+    "article .description__article-main:not(.caption__article--about-block-samebook)",
+  )
+    .first()
+    .clone();
   desc.find("div").remove();
   return desc.text().trim();
 }
