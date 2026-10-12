@@ -37,5 +37,8 @@
 - On Android, `src/popup.ts` reads the content script directly and opens HTTP
   file links in new tabs; it deliberately bypasses the background download queue.
 - Release version comes from `src/extension/manifest.json`, not `package.json`.
+  Manifest versions always have three numeric components (`<major>.<minor>.1`);
+  the third component is always `1` (for example, branch `v2.3` corresponds to
+  manifest version `2.3.1`).
   The release workflow publishes `v<version>` from `master` and skips publication
   if that release already exists.

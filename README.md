@@ -39,6 +39,10 @@
 
 Лицензия: [MIT](LICENSE)
 
+## Privacy
+
+[Privacy Policy / Datenschutzerklärung / Политика конфиденциальности](PRIVACY.md)
+
 ## Development
 
 ```sh
